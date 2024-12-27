@@ -21,7 +21,7 @@ export const account = new Account(client);
 export async function login() {
   try {
     const redirectUri = Linking.createURL("/");
-    const response = await account.createOAuth2Session(
+    const response = await account.createOAuth2Token(
       OAuthProvider.Google,
       redirectUri
     );
@@ -46,6 +46,7 @@ export async function login() {
     return true;
   } catch (error) {
     console.error(error);
+    return false;
   }
 }
 
@@ -68,6 +69,7 @@ export async function getUser() {
         avatar: userAvatar.toString(),
       };
     }
+    return null;
   } catch (error) {
     console.error(error);
     return null;
