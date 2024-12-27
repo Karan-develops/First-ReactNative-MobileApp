@@ -21,24 +21,26 @@ export const account = new Account(client);
 export async function login() {
   try {
     const redirectUri = Linking.createURL("/");
+
     const response = await account.createOAuth2Token(
       OAuthProvider.Google,
       redirectUri
     );
-    if (!response) throw new Error("Failed to login 1");
+    if (!response) throw new Error("OAuth2 token creation failed");
 
     const browserResult = await openAuthSessionAsync(
       response.toString(),
       redirectUri
     );
-    if (browserResult.type !== "success") throw new Error("Failed to login 2");
+    if (browserResult.type !== "success") {
+      throw new Error("Browser auth session failed");
+    }
 
     const url = new URL(browserResult.url);
-
+    
     const secret = url.searchParams.get("secret")?.toString();
     const userId = url.searchParams.get("userId")?.toString();
-
-    if (!secret || !userId) throw new Error("Failed to login 3");
+    if (!secret || !userId) throw new Error("Missing secret or userId in URL");
 
     const session = await account.createSession(userId, secret);
     if (!session) throw new Error("Failed to create session");
@@ -52,10 +54,11 @@ export async function login() {
 
 export async function logout() {
   try {
-    await account.deleteSession("current");
-    return true;
+    const result = await account.deleteSession("current");
+    return result;
   } catch (error) {
     console.error(error);
+    return false;
   }
 }
 
@@ -63,7 +66,7 @@ export async function getUser() {
   try {
     const response = await account.get();
     if (response.$id) {
-      const userAvatar = avatar.getInitials(response.name || "");
+      const userAvatar = avatar.getInitials(response.name || "Guest");
       return {
         ...response,
         avatar: userAvatar.toString(),
