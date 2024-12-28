@@ -80,7 +80,7 @@ export async function logout() {
 export async function getUser() {
   try {
     const response = await account.get();
-    if (response.$id) {
+    if (response && response.$id) {
       const userAvatar = avatar.getInitials(response.name || "Guest");
       return {
         ...response,
@@ -89,7 +89,7 @@ export async function getUser() {
     }
     return null;
   } catch (error) {
-    console.error(error);
+    // console.error(error);
     return null;
   }
 }
